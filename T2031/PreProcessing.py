@@ -49,9 +49,9 @@ class Row():
         str_ = re.sub("《{2,}","《", str_)
         str_ = re.sub("》{2,}","》", str_)
 
-        str_ = re.sub("·",",",str_)
+        str_ = re.sub("·",", ",str_)
 
-        str_ = re.sub("[^a-zA-Z0-9가-힇ㄱ-ㅎㅏ-ㅣぁ-ゔァ-ヴー々〆〤一-龥\"\-.,?!()《》 ]", "", str_) # remove special chars
+        str_ = re.sub("[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣぁ-ゔァ-ヴー々〆〤一-龥\"\-.,?!()《》 ]", "", str_) # remove special chars
         str_ = re.sub("\.{2,}",".", str_) # multiple punkts to one. 
         str_ = re.sub(" {2,}"," ", str_) # multiple blanks to one. 
 
@@ -72,16 +72,16 @@ class Row():
 
             self.sentence = (part_a + self.subject["word"] + part_b + self.object["word"] + part_c)
             self.subject["start_idx"] = len(part_a)
-            self.subject["end_idx"] = self.subject["start_idx"] + len(self.subject["word"])
-            self.object["start_idx"] = self.subject["end_idx"] + len(part_b)
-            self.object["end_idx"] = self.object["start_idx"] + len(self.object["word"])
+            self.subject["end_idx"] = self.subject["start_idx"] + len(self.subject["word"])-1
+            self.object["start_idx"] = self.subject["end_idx"] + len(part_b) +1
+            self.object["end_idx"] = self.object["start_idx"] + len(self.object["word"]) -1
 
         else:
             self.sentence = (part_a + self.object["word"] + part_b + self.subject["word"] + part_c)
             self.object["start_idx"] = len(part_a)
-            self.object["end_idx"] = self.object["start_idx"] + len(self.object["word"])
-            self.subject["start_idx"] = self.object["end_idx"] + len(part_b)
-            self.subject["end_idx"] = self.subject["start_idx"] + len(self.subject["word"])
+            self.object["end_idx"] = self.object["start_idx"] + len(self.object["word"]) -1
+            self.subject["start_idx"] = self.object["end_idx"] + len(part_b) +1 
+            self.subject["end_idx"] = self.subject["start_idx"] + len(self.subject["word"]) -1
 
     def get_result(self):
         return [self.sentence, self.subject, self.object, self.label]
