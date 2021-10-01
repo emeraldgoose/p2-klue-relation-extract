@@ -78,10 +78,10 @@ def label_to_num(label):
 ###################
 def my_hp_space(trial):  ##옵션을 줄 수 있어요
     return {
-        "learning_rate": trial.suggest_float("learning_rate", 1e-4, 1e-2, log=True),
-        "num_train_epochs": trial.suggest_int("num_train_epochs", 1, 5),
+        "learning_rate": trial.suggest_float("learning_rate",5e-e, 3e-5, 2e-5, log=True),
+        "num_train_epochs": trial.suggest_int("num_train_epochs", 2, 4),
         "seed": trial.suggest_int("seed", 1, 40),
-        "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [4, 8, 16, 32, 64]),
+        "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [16, 32]),
     }
 
 
@@ -128,9 +128,6 @@ training_args = TrainingArguments(output_dir='./results',  # output directory
                                   logging_dir='./logs',  # directory for storing logs
                                   logging_steps=100,  # log saving step.
                                   evaluation_strategy='steps',  # evaluation strategy to adopt during training
-                                  # `no`: No evaluation during training.
-                                  # `steps`: Evaluate every `eval_steps`.
-                                  # `epoch`: Evaluate every end of epoch.
                                   eval_steps=500,  # evaluation step.
                                   load_best_model_at_end=True
                                   )
