@@ -36,9 +36,7 @@ class Row():
 
     def _sub_run(self, str_):
 
-        str_ = re.sub("[“‘’”\']","\"", str_) # unify different quotation marks
-        str_ = re.sub("\"{2,}","\"", str_) # remove duplicated quotation marks
-
+        str_ = re.sub("[“‘’”\"]","\'", str_) # unify different quotation marks
         str_ = re.sub("[\[{(（［｛〔]","(", str_) # unify different brackets
         str_ = re.sub("[\]})）］｝〕]",")", str_)
         str_ = re.sub("\({2,}","(", str_)
@@ -51,10 +49,12 @@ class Row():
 
         str_ = re.sub("·",", ",str_)
 
-        str_ = re.sub("[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣぁ-ゔァ-ヴー々〆〤一-龥\"\-.,?!()《》 ]", "", str_) # remove special chars
+        str_ = re.sub("[^a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣぁ-ゔァ-ヴー々〆〤一-龥\'\-~.,?!()《》 ]", "", str_) # remove special chars
         str_ = re.sub("\.{2,}",".", str_) # multiple punkts to one. 
         str_ = re.sub(" {2,}"," ", str_) # multiple blanks to one. 
 
+        str_ = re.sub("\'{2,}","\'", str_) # remove duplicated quotation marks
+        
         return str_
 
     def run(self):
@@ -111,4 +111,5 @@ class PreProcessing:
 
     def to_csv(self, file_name):
         pd.DataFrame(self.result, columns = ["sentence", "subject_entity", "object_entity", "label"]).to_csv(file_name)
+        
         
