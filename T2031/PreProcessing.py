@@ -2,39 +2,18 @@ import torch
 import pandas as pd
 import numpy as np
 import re
+import os
 import tqdm
 
-class Row():
+# Pre processing
 
-    def __init__(self, list_):
-        self.list_ = list_ # [sentence, sub, obj, label]
+class PreProcessor():
 
-        self.sentence = self.list_[0]
-        self.subject = eval(self.list_[1]) # dict {word, start_idx, end_idx, type}
-        self.object = eval(self.list_[2]) # dict {word, start_idx, end_idx, type}
-        self.label = self.list_[3]
-        self.flag_who_comes_faster = 0 # 0 : subject first, 1 : object_first
+    def __init__(self, csv_path):
+        self.values = pd.read_csv(csv_path, index_col = 0).values[:, :-1] # 출처를 제외한 모든 정보를 가져옴
+        self.result = []
 
-    def _get_splited_point(self):
-
-        if self.subject["start_idx"] > self.object["start_idx"]:
-            self.flag_who_comes_faster = 1
-
-        if self.flag_who_comes_faster == 0:
-            split_a = self.subject["start_idx"]
-            split_b = self.subject["end_idx"]+1
-            split_c = self.object["start_idx"]
-            split_d = self.object["end_idx"]+1
-
-        else:
-            split_c = self.subject["start_idx"]
-            split_d = self.subject["end_idx"]+1
-            split_a = self.object["start_idx"]
-            split_b = self.object["end_idx"]+1
-
-        return split_a, split_b, split_c, split_d
-
-    def _sub_run(self, str_):
+    def _run_part(self, str_):
 
         str_ = re.sub("[“‘’”\"]","\'", str_) # unify different quotation marks
         str_ = re.sub("[\[{(（［｛〔]","(", str_) # unify different brackets
@@ -57,59 +36,58 @@ class Row():
         
         return str_
 
-    def run(self):
-        
-        if self.sentence.startswith("\""):
-            self.sentence = re.sub("\"(.+)\"",r"\1", self.sentence).strip() # remove first and last quotation mark
+    def _tokenize(self, entity):
 
-        split_a, split_b, split_c, split_d = self._get_splited_point()
+        type_ = entity["type"]
+        word = entity["word"]
 
-        part_a = self._sub_run(self.sentence[:split_a]).lstrip()
-        part_b = self._sub_run(self.sentence[split_b:split_c])
-        part_c = self._sub_run(self.sentence[split_d:]).rstrip()
+        return "[" + type_ + "]" + word + "[/" + type_ + "]"
 
-        if self.flag_who_comes_faster == 0:
 
-            self.sentence = (part_a + self.subject["word"] + part_b + self.object["word"] + part_c)
-            self.subject["start_idx"] = len(part_a)
-            self.subject["end_idx"] = self.subject["start_idx"] + len(self.subject["word"])-1
-            self.object["start_idx"] = self.subject["end_idx"] + len(part_b) +1
-            self.object["end_idx"] = self.object["start_idx"] + len(self.object["word"]) -1
+    def _run_by_step(self, idx, original = False):
+
+        sentence = self.values[idx, 0]
+        sbj = eval(self.values[idx, 1]) # dict {word, start_idx, end_idx, type}
+        obj = eval(self.values[idx, 2]) # dict {word, start_idx, end_idx, type}
+        label = self.values[idx, 3]
+
+        sub_first_flag = 1 if sbj["start_idx"] < obj['start_idx'] else 0 # if subject comes first 1 else 0
+
+        # split the sentence
+        if sub_first_flag:
+            part_a = sentence[:sbj["start_idx"]]
+            part_b = sentence[sbj['end_idx']+1 : obj['start_idx']]
+            part_c = sentence[obj["end_idx"]+1 :]
 
         else:
-            self.sentence = (part_a + self.object["word"] + part_b + self.subject["word"] + part_c)
-            self.object["start_idx"] = len(part_a)
-            self.object["end_idx"] = self.object["start_idx"] + len(self.object["word"]) -1
-            self.subject["start_idx"] = self.object["end_idx"] + len(part_b) +1 
-            self.subject["end_idx"] = self.subject["start_idx"] + len(self.subject["word"]) -1
+            part_a = sentence[:obj["start_idx"]]
+            part_b = sentence[obj['end_idx']+1 : sbj['start_idx']]
+            part_c = sentence[sbj["end_idx"]+1 :]
 
-    def get_result(self):
-        return [self.sentence, self.subject, self.object, self.label]
+        part_a = self._run_part(part_a).lstrip()
+        part_b = self._run_part(part_b)
+        part_c = self._run_part(part_c).rstrip()
 
-class PreProcessing:
-    
-    def __init__(self, csv_path):
-        self.values = pd.read_csv(csv_path, index_col = 0).values[:, :-1] # 출처를 제외한 모든 정보를 가져옴
-        self.result = []
+        sub_token = self._tokenize(sbj)
+        obj_token = self._tokenize(obj)
 
-    def _run_by_step(self, index, original = False):
-
-        row = self.values[index]
-        row_instance = Row(row)
-
-        row_instance.run()
+        # concatenate the parts
+        if sub_first_flag:
+            sentence = part_a + sub_token + part_b + obj_token + part_c
+        else:
+            sentence = part_a + obj_token + part_b + sub_token + part_c
 
         if original:
-            return row, row_instance.get_result()
+            return self.values[idx], [sentence, sbj, obj, label]
         else:
-            return row_instance.get_result()
+            return [sentence, sbj, obj, label]
 
-    def run(self):
-        for i in tqdm.tqdm(range(len(self.values))):
-            temp = self._run_by_step(i)
-            self.result.append(temp)
+    def run(self, save_csv):
 
-    def to_csv(self, file_name):
-        pd.DataFrame(self.result, columns = ["sentence", "subject_entity", "object_entity", "label"]).to_csv(file_name)
-        
-        
+        for record_idx in range(len(self.values)):
+            record = self._run_by_step(record_idx)
+            self.result.append(record)
+
+        print("preprocessing done!")
+
+        pd.DataFrame(self.result, columns = ["sentence", "sub_entity", "obj_entity", "label"]).to_csv(save_csv)
