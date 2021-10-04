@@ -3,8 +3,9 @@ from transformers import BertPreTrainedModel, BertModel
 from transformers import AutoConfig
 from transformers.modeling_outputs import SequenceClassifierOutput
 
+
 class bertCustomMultilabelClassifier(BertPreTrainedModel):
-    
+
     """ Custom Multi labels classificer based on Bert """
 
     def __init__(self, config, num_labels=30):
@@ -12,13 +13,10 @@ class bertCustomMultilabelClassifier(BertPreTrainedModel):
         self.num_labels = num_labels
         self.in_feature = 768
         self.bert = BertModel(config)
-        classifier_dropout = (
-            config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob
-        )
-        self.dropout = torch.nn.Dropout(classifier_dropout)
+        self.dropout = torch.nn.Dropout(config.hidden_dropout_prob)
         self.GRU = torch.nn.GRU(input_size=self.in_feature, hidden_size=self.in_feature,
                                 dropout=config.hidden_dropout_prob, bidirectional=True)
-        self.classifier = torch.nn.Linear(config.hidden_size, num_labels)
+        self.classifier = torch.nn.Linear(self.in_feature, num_labels)
 
     def forward(
         self,
@@ -46,7 +44,7 @@ class bertCustomMultilabelClassifier(BertPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict
         )
-        
+
         pooled_output = outputs[1]
 
         pooled_output = self.dropout(pooled_output)
@@ -55,7 +53,7 @@ class bertCustomMultilabelClassifier(BertPreTrainedModel):
 
         logits = self.classifier(pooled_output)
         loss = None
-        
+
         loss_fn = torch.nn.BCEWithLogitsLoss()
         loss = loss_fn(logits.view(-1, self.num_labels), labels.view(-1))
 
@@ -75,7 +73,7 @@ def main():
     config = AutoConfig.from_pretrained('klue/bert-base')
     # print(config)
     model = bertCustomMultilabelClassifier(config)
-    print(model)
+    device = torch.device('cpu')
 
 
 if __name__ == "__main__":
