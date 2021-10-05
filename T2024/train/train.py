@@ -81,7 +81,7 @@ def train_one_fold(fold, train_dataset, eval_dataset, tokenizer, added_token_num
         save_total_limit=2,              # number of total save model.
         save_steps=500,                  # model saving step.
         num_train_epochs=10,              # total number of training epochs
-        learning_rate=5e-5,              # learning_rate
+        learning_rate=1e-5,              # learning_rate
         per_device_train_batch_size=16,  # batch size per device during training
         per_device_eval_batch_size=32,   # batch size for evaluation
         weight_decay=1e-6,               # strength of weight decay
@@ -109,14 +109,14 @@ def train():
     print(device)
 
     # load model and tokenizer
-    MODEL_NAME = "klue/bert-base"
+    MODEL_NAME = "klue/roberta-large"
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     
     # insert speical tokens (unk, unused token)
     user_defined_symbols = ['[unused]']
     for i in range(1,10):
         user_defined_symbols.append(f'[UNK{i}]')
-    for i in range(1,100):
+    for i in range(1,200):
         user_defined_symbols.append(f'[unused{i}]')
     
     special_tokens_dict = {'additional_special_tokens': user_defined_symbols}
