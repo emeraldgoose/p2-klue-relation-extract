@@ -63,13 +63,21 @@ def main(args):
   """
     주어진 dataset csv 파일과 같은 형태일 경우 inference 가능한 코드입니다.
   """
-  # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-  device = torch.device(args.device)
+  device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+  # device = torch.device(args.device)
   print(device)
 
   # load tokenizer
-  MODEL_NAME = "klue/roberta-base"
+  MODEL_NAME = "klue/roberta-large"
+  user_defined_symbols = ['[unused]']
+  for i in range(1,10):
+      user_defined_symbols.append(f'[UNK{i}]')
+  for i in range(1,200):
+      user_defined_symbols.append(f'[unused{i}]')
+    
+  special_tokens_dict = {'additional_special_tokens': user_defined_symbols}
   tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+  tokenizer.add_special_tokens(special_tokens_dict)
 
   ## load my model 
   num_of_fold = args.fold
@@ -80,6 +88,7 @@ def main(args):
     MODEL_DIR = os.path.join(args.model_dir, f'{fold_index + 1}') # model dir.
     
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
+    model.resize_token_embeddings(tokenizer.vocab_size + len(user_defined_symbols))
     model.to(device)
 
     ## load test datset
