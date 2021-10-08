@@ -119,17 +119,18 @@ x-axis represents Recall, y-axis represents Precision, and it measures score by 
 Models are included like below
 * [klue/roberta-large](https://huggingface.co/roberta-large)
 
+If you want HyperParameter Fine Tuning, you can modify `config.json`
 
 # Train
 We train models **klue/roberta-large**. You can train using our train.py file.
 ```
-python3 train.py
+python3 train.py --fold [num_of_fold]
 ```
 
 # Inference
 If you finish training model, you can create submission.csv file using inference.py. We give sample inference.py usage.
 ```
-python3 inference.py --model_dir model_dir --fold num_of_fold --device device
+python3 inference.py --model_dir [model_dir] --fold [num_of_fold] --device [device]
 ```
 
 # Performance
