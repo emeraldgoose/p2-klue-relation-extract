@@ -25,6 +25,7 @@ relation: 단체:별칭 (org:alternate_names)
 - pandas==1.1.5
 - scikit-learn~=0.24.1
 - transformers==4.10.0
+- omegaconf==2.1.1
 
 ## Installation
 ```
