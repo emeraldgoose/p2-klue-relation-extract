@@ -33,7 +33,13 @@ def label_to_num(label):
 
 
 def preprocessing_dataset(dataset):
-    """ 처음 불러온 csv 파일을 원하는 형태의 DataFrame으로 변경 시켜줍니다."""
+    """ 
+        처음 불러온 csv 파일을 원하는 형태의 DataFrame으로 변경 시켜줍니다.
+        
+        return string:
+            subject_word [SEP] subject_type [SEP] object_word [SEP] object_type [SEP] sentence
+        
+    """
     sep = '[SEP]'
 
     for index, (s, e01, e02) in tqdm(enumerate(zip(dataset['sentence'], dataset['subject_entity'], dataset['object_entity']))):
@@ -68,6 +74,10 @@ def load_data(dataset_dir, train=True):
 
 
 def tokenized_dataset(dataset, tokenizer):
+    """
+        return :
+            [CLS] subject_word [SEP] subject_type [SEP] object_word [SEP] object_type [SEP] sentence [SEP]
+    """
     tokenized_sentences = tokenizer(
         list(dataset['sentence']),
         return_tensors='pt',
