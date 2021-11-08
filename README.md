@@ -5,8 +5,6 @@ Code of solution for label classification of **KLUE** **Relation Extraction** Da
 
 **Relation Extraction** is a problem of predicting properties and relationships for words in a sentence.
 
-![](https://i.imgur.com/DcEK8Q8.png)
-
 ```
 sentence: 오라클(구 썬 마이크로시스템즈)에서 제공하는 자바 가상 머신 말고도 각 운영 체제 개발사가 제공하는 자바 가상 머신 및 오픈소스로 개발된 구형 버전의 온전한 자바 VM도 있으며,
 GNU의 GCJ나 아파치 소프트웨어 재단(ASF: Apache Software Foundation)의 하모니(Harmony)와 같은 아직은 완전하지 않지만 지속적인 오픈 소스 자바 가상 머신도 존재한다.
@@ -56,7 +54,14 @@ The type of `subject_entity` and `object_entity` is a dictionary-form string, an
 
 explanation of the `label` column is like below:
 
-![](https://i.imgur.com/QLbjzVj.png)
+|labels|||||
+|-|-|-|-|-|
+|no_relation|org:dissolved|org:founded|org:place_of_headquarters|org:alternate_names|
+|org_member_of|org:members|org:political/religious_affiliation|org:product|org;founded_by|
+|org:top_members/employees|org:number_of_employees/members|per:date_of_birth|per:date_of_death|per:place_of_birth|
+|per:place_of_death|per:place_of_residence|per:origin|per:employee_of|per:schools_attended|
+|per:alternate_names|per:parents|per:children|per:siblings|per:spouse|
+|per:other_family|per:colleagues|per:product|per:religion|per:title|
 
 source : https://github.com/KLUE-benchmark/KLUE
 
@@ -109,11 +114,9 @@ $precision = \displaystyle\frac{TP}{TP + FP}$
 $Recall = \displaystyle\frac{TP}{TP+FN}$
 
 $F1\,score = 2\times \displaystyle\frac{Precision \times Recall}{Precision + Recall}$
-![](https://i.imgur.com/LNNDWIr.png)
 
 ## area under the precision-recall curve (AUPRC) for every class
 x-axis represents Recall, y-axis represents Precision, and it measures score by calculating average AUPRC of every class. Useful metric for imbalance data.
-![](https://i.imgur.com/tDo9TgM.png)
 
 # Model
 Models are included like below
