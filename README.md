@@ -144,9 +144,10 @@ python3 inference.py --model_dir [model_dir] --fold [num_of_fold] --device [devi
 **LB score (private)**: 
 - micro f1 : 71.556, auprc : 73.898
 
+## 회고
+- [https://emeraldgoose.github.io/contest/2021/11/15/mrc/](https://emeraldgoose.github.io/contest/2021/11/15/mrc/)
 
-
-# reference paper
+## reference paper
 * https://arxiv.org/pdf/2105.09680.pdf #klue dataset
 * https://arxiv.org/pdf/1907.11692.pdf #RoBERTa
 * https://arxiv.org/pdf/1901.11196.pdf #Easy Data Augmentation
